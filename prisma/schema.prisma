@@ -1,0 +1,31 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model GrammarTest {
+  id        String   @id @default(uuid()) @db.Uuid @map("id")
+  problem   String   @map("problem")
+  type      String   @map("type")
+  level     String   @map("level")
+  
+  answers   Answer[]
+
+  @@map("grammar_test")
+}
+
+model Answer {
+  id               String        @id @default(uuid()) @db.Uuid @map("id")
+  content          String        @map("content")
+  correct          Boolean       @map("correct")
+
+  grammarTestId    String        @db.Uuid @map("grammar_test_id")
+  grammarTest      GrammarTest   @relation(fields: [grammarTestId], references: [id])
+
+  @@map("answer")
+}
