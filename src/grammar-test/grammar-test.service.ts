@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { GrammarTestGetResponse } from './dto/grammar-test-get.response';
+import { GrammarTestResponse } from './dto/grammar-test.response';
 
 @Injectable()
 export class GrammarTestService {
@@ -16,7 +16,10 @@ export class GrammarTestService {
     });
   }
 
-  async getByLevel(level: string, type: string) {
+  async getByLevel(
+    level: string,
+    type: string,
+  ): Promise<GrammarTestResponse[]> {
     const data = await this.prisma.grammarTest.findMany({
       where: {
         level,
@@ -24,6 +27,6 @@ export class GrammarTestService {
       },
       include: { answers: true },
     });
-    return data.map((item) => GrammarTestGetResponse.from(item));
+    return data.map((item) => GrammarTestResponse.from(item));
   }
 }
