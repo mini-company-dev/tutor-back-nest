@@ -1,42 +1,35 @@
-# ------------------------
-# 1. Build Stage
-# ------------------------
-FROM node:22-alpine AS builder
+# 공식 Node.js 이미지를 기본 이미지로 사용합니다.
+FROM node:20-alpine AS builder
+
+# 작업 디렉토리를 설정합니다.
 WORKDIR /app
 
-RUN npm install -g pnpm
+# package.json 및 package-lock.json 파일을 복사합니다.
+COPY package*.json ./
 
-COPY package.json pnpm-lock.yaml* ./
-RUN pnpm install --frozen-lockfile
+# Prisma 클라이언트를 위한 추가 종속성을 설치합니다.
+RUN npm install prisma@latest
 
+# 모든 종속성을 설치합니다.
+RUN npm install
+
+# NestJS 소스 코드를 복사합니다.
 COPY . .
 
-# Prisma Client 생성
-RUN pnpm prisma generate
+# Prisma 클라이언트를 빌드합니다.
+RUN npm run build
 
-# NestJS Build
-RUN pnpm build
+# 최종 이미지를 위한 기본 런타임 이미지를 설정합니다.
+FROM node:20-alpine AS runner
 
-
-# ------------------------
-# 2. Runtime Stage
-# ------------------------
-FROM node:22-alpine AS runner
-WORKDIR /app
-
-RUN npm install -g pnpm
-
-COPY package.json pnpm-lock.yaml* ./
-RUN pnpm install --prod --frozen-lockfile
-
-# Prisma Client 관련 폴더 복사
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-
-# NestJS dist 파일 복사
+# 데이터베이스 마이그레이션 및 앱 실행에 필요한 파일들을 복사합니다.
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
-
-# Prisma schema
+COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/prisma ./prisma
 
-EXPOSE 3000
-CMD ["node", "dist/main.js"]
+# Prisma CLI와 관련된 실행 권한을 부여합니다.
+RUN chmod +x ./node_modules/.bin/prisma
+
+# 앱이 시작될 때 Prisma 마이그레이션을 적용합니다.
+CMD ["npx", "prisma", "migrate", "deploy", "&&", "npm", "start"]
