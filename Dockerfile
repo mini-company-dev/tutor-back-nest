@@ -32,4 +32,4 @@ COPY --from=builder /app/prisma ./prisma
 RUN chmod +x ./node_modules/.bin/prisma
 
 # 앱이 시작될 때 Prisma 마이그레이션을 적용합니다.
-CMD ["npx", "prisma", "migrate", "deploy", "&&", "npm", "start"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]
