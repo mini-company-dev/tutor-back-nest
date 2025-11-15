@@ -1,5 +1,5 @@
 # 공식 Node.js 이미지를 기본 이미지로 사용합니다.
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 # 작업 디렉토리를 설정합니다.
 WORKDIR /app
@@ -20,7 +20,7 @@ COPY . .
 RUN npm run build
 
 # 최종 이미지를 위한 기본 런타임 이미지를 설정합니다.
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 
 # 데이터베이스 마이그레이션 및 앱 실행에 필요한 파일들을 복사합니다.
 COPY --from=builder /app/node_modules ./node_modules
