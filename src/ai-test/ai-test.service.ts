@@ -2,10 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { History } from './dto/history.request';
 import { GoogleGenAI } from '@google/genai';
 import { TutorResponse } from './dto/speak.response';
-import {
-  ParseException,
-  RequestFailedException,
-} from 'src/common/exception/api.exception';
+import { RequestFailedException } from 'src/common/exception/api.exception';
+
 @Injectable()
 export class AiTestService {
   private ai = new GoogleGenAI({
@@ -17,11 +15,8 @@ export class AiTestService {
     histories: History[],
   ): Promise<TutorResponse> {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      const fileButter: Buffer = file.buffer as Buffer;
-      const base64: string = fileButter.toString('base64');
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      const mimeType: string = (file.mimetype as string) || 'audio/webm';
+      const base64 = file.buffer.toString('base64');
+      const mimeType = file.mimetype || 'audio/webm';
 
       const prompt = this.buildPrompt(histories);
 
@@ -38,15 +33,13 @@ export class AiTestService {
         ],
       });
 
-      const text = (response.text || '').trim();
+      const text = response.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+
       const clean = text.replace(/```json|```/g, '').trim();
 
-      try {
-        return JSON.parse(clean) as TutorResponse;
-      } catch {
-        throw new ParseException();
-      }
-    } catch {
+      return JSON.parse(clean) as TutorResponse;
+    } catch (e) {
+      console.error('AI evaluate error:', e);
       throw new RequestFailedException();
     }
   }
