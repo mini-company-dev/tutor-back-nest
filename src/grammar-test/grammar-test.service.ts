@@ -13,6 +13,7 @@ export class GrammarTestService {
   findOne(id: string) {
     return this.prisma.grammarTest.findUnique({
       where: { id },
+      include: { answers: true },
     });
   }
 
