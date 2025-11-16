@@ -11,7 +11,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { History } from './dto/history.request';
 import { CustomResponse } from 'src/common/global.response';
 
-@Controller('aiTest')
+@Controller('/api/aiTest')
 export class AiTestController {
   constructor(private readonly aiTestService: AiTestService) {}
 

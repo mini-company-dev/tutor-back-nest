@@ -5,6 +5,12 @@ import { GlobalExceptionFilter } from './common/exception/global.exception';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.enableCors({
+    origin: ['http://localhost:3000', 'https://www.easyfunspeak.com'],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  });
+
   app.useGlobalFilters(new GlobalExceptionFilter());
 
   const config = new DocumentBuilder()
