@@ -7,7 +7,11 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: ['http://localhost:3000', 'https://www.easyfunspeak.com'],
+    origin: [
+      'http://localhost:3000',
+      'https://www.easyfunspeak.com',
+      'https://easyfunspeak.com',
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   });
 
